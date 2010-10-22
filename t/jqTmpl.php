@@ -1,5 +1,15 @@
 <?php
 
+//
+// In the parent directory:
+//
+//     $ phpunit t/jqTmpl.php
+//
+// or:
+//
+//     $ make test
+//
+
 require dirname(__DIR__) . '/jqTmpl.class.php';
 
 class jqTmplTest extends PHPUnit_Framework_TestCase {
@@ -83,6 +93,13 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 			'adam',
 			$t->tmpl( $t->pq('script'), array('bar' => 'adam') ),
 			'query uses first found node'
+		);
+
+		$html = '<i>${foo}</i>';
+		$t->load_document($html);
+		$this->assertEquals(
+			'<i>bar</i>',
+			$t->tmpl( $t->pq(), array('foo' => 'bar') )
 		);
 	}
 }
