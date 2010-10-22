@@ -49,12 +49,74 @@ class jqTmpl {
 
 		$tmpl_string = $this->preparse( $tmpl_string );
 
-		$tmpl_string = preg_replace_callback( "/{{= ([^}]+?)\s*}}/", function($m) use ($data) {
-			return $data[$m[1]];
-		}, $tmpl_string );
+		preg_match_all( '/\{\{(?<slash>\/?)(?<type>\w+|.)(?:\((?<fnargs>(?:[^\}]|\}(?!\}))*?)?\))?(?:\s+(?<target>.*?)?)?(?<parens>\((?<args>(?:[^\}]|\}(?!\}))*?)\))?\s*\}\}/', $tmpl_string, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
 
-		return $tmpl_string;
+		$html = ''; // build new template into here
+
+		$state = array(
+			'eof' => strlen($tmpl_string), // length of the template string
+			'pos' => 0,                    // current position in template string
+			'if' => 0,                     // if statement depth
+			'skip' => 0,                   // >1 if we are skipping (ie. due to a false if condition)
+		);
+
+		$this->parse( $tmpl_string, $data, $matches, $state, $html );
+
+		return $html;
 	}//end tmpl
+
+	/**
+	 * Parse a template to build an HTML string.
+	 */
+	public function parse( $tmpl, $data, &$matches, &$state, &$html ) {
+		while(true) {
+			if( empty($matches) ) {
+				if( $state['pos'] < $state['eof'] ) {
+					// just copy rest of string
+					$html .= substr($tmpl, $state['pos']);
+					break;
+				}
+				break;
+			}
+
+			// have a match. do we have intervening non-matching text?
+			
+			$match = array_shift($matches);
+			
+			if( $state['pos'] < $match[0][1] ) {
+				if( $state['skip'] == 0 ) {
+					$html .= substr($tmpl, $state['pos'], $match[0][1] - $state['pos']);
+				}
+
+				$state['pos'] = $match[0][1];
+			}
+
+			$type = $match['type'][0];
+			$target = isset($match['target']) ? $match['target'][0] : null;
+
+			if( $type == '=' && $state['skip'] == 0 ) {
+				$html .= $data[ $target ];
+			} elseif( $type == 'if' ) {
+				// opening if
+				if( ! $match['slash'][0] ) {
+					$state['if'] += 1;
+
+					if( ! $data[ $target ] ) {
+						$state['skip'] += 1;
+					}
+				}
+
+				// closing if; decrement skip if necessary
+				else {
+					if( $state['skip'] ) $state['skip'] -= 1;
+					$state['if'] -= 1;
+				}
+			}
+
+			// move string position after the template tag
+			$state['pos'] = $match[0][1] + strlen($match[0][0]);
+		}
+	}//end parse
 
 	/**
 	 * Get, set, or query using the phpQuery object.

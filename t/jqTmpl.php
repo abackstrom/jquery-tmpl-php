@@ -36,18 +36,33 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		$t = new jqTmpl;
 
 		$this->assertEquals(
+			'foo',
+			$t->tmpl('foo'),
+			'no substitutions'
+		);
+
+		$this->assertEquals(
+			'foofoofoo',
+			$t->tmpl('foo{{= blah}}foo', array('blah' => 'foo')),
+			'tag nested in text'
+		);
+
+		$this->assertEquals(
 			'bar',
-			$t->tmpl('${foo}', array('foo' => 'bar'))
+			$t->tmpl('${foo}', array('foo' => 'bar')),
+			'simple substitution'
 		);
 
 		$this->assertEquals(
 			'bar, adam',
-			$t->tmpl('${foo}, {{= name}}', array('foo' => 'bar', 'name' => 'adam'))
+			$t->tmpl('${foo}, {{= name}}', array('foo' => 'bar', 'name' => 'adam')),
+			'two tags'
 		);
 
 		$this->assertEquals(
 			'bar, adam',
-			$t->tmpl('${ foo }, {{= name }}', array('foo' => 'bar', 'name' => 'adam'))
+			$t->tmpl('${ foo }, {{= name }}', array('foo' => 'bar', 'name' => 'adam')),
+			'tags with extra whitespace'
 		);
 	}
 
@@ -100,6 +115,22 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(
 			'<i>bar</i>',
 			$t->tmpl( $t->pq(), array('foo' => 'bar') )
+		);
+	}
+
+	function testTags() {
+		$t = new jqTmpl;
+
+		$this->assertEquals(
+			'yes',
+			$t->tmpl( '{{if foo}}yes{{/if}}', array('foo' => 'yes') ),
+			'true if condition'
+		);
+
+		$this->assertEquals(
+			'no',
+			$t->tmpl( 'no{{if foo}}yes{{/if}}', array('foo' => false) ),
+			'false if condition'
 		);
 	}
 }
