@@ -7,17 +7,17 @@ An attempt at implementing jquery-tmpl in PHP.
 
 Supported syntax:
 
-* ${foo}, {{= foo}}
-* {{html bar}}
-* {{if foo}}
-* {{else}}
-* {{! comment}}
-* {{tmpl "selector"}}, ie. {{tmpl "#baz"}}
-* {{each foo}}, {{each(k,v) foo}}
+* `${foo}, `{{= foo}}`
+* `{{html bar}}`
+* `{{if foo}}`
+* `{{else}}`
+* `{{! comment}}`
+* `{{tmpl "selector"}}`, ie. `{{tmpl "#baz"}}`
+* `{{each foo}}`, `{{each(k,v) foo}}`
 
 Still unsupported:
 
-* {{tmpl(foo) "#bar"}} -- data parameter to nested template
+* `{{tmpl(foo) "#bar"}}` -- data parameter to nested template
 
 Possibly volatile:
 
