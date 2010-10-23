@@ -75,14 +75,17 @@ class jqTmpl {
 	public function parse( $tmpl, $data, &$matches, &$state ) {
 		$html = '';
 
-		$state['depth'] += 1;
+		extract( $state, EXTR_REFS );
+
+		$depth += 1;
 
 		while(true) {
-			$this->debug( "skip mode is [%s], depth [%d]", $state['skip'] ? 'on' : 'off', $state['depth'] );
+			$this->debug( "skip mode is [%s], depth [%d]", $skip ? 'on' : 'off', $depth );
+
 			if( empty($matches) ) {
-				if( $state['pos'] < $state['eof'] ) {
+				if( $pos < $eof ) {
 					// just copy rest of string
-					$html .= substr($tmpl, $state['pos']);
+					$html .= substr($tmpl, $pos);
 					break;
 				}
 				break;
@@ -96,11 +99,12 @@ class jqTmpl {
 
 			// we have text between template tags; get us up to the next tag,
 			// appending the intervening text if necessary (ie. not in skip mode)
-			if( $state['skip'] == false && $state['pos'] < $match[0][1] ) {
-				$this->debug('adding string [%s]', substr($tmpl, $state['pos'], $match[0][1] - $state['pos']));
-				$html .= substr($tmpl, $state['pos'], $match[0][1] - $state['pos']);
+			if( $skip == false && $pos < $match[0][1] ) {
+				$this->debug('adding string [%s]', substr($tmpl, $pos, $match[0][1] - $pos));
 
-				$state['pos'] = $match[0][1];
+				$html .= substr($tmpl, $pos, $match[0][1] - $pos);
+
+				$pos = $match[0][1];
 			}
 
 			$type = $match['type'][0];
@@ -110,35 +114,34 @@ class jqTmpl {
 			$this->debug("type is [%s]; target is [%s]\n", $type, $target);
 
 			// move string position after the template tag
-			$state['pos'] = $match[0][1] + strlen($match[0][0]);
+			$pos = $match[0][1] + strlen($match[0][0]);
 
 			//
 			// what is our template tag?
 			//
 
-			if( $type == '=' && $state['skip'] == 0 ) {
+			if( $type == '=' && $skip == 0 ) {
 				$html .= htmlentities($data[ $target ]);
-			} elseif( $type == 'html' && $state['skip'] == 0 ) {
+			} elseif( $type == 'html' && $skip == 0 ) {
 				$html .= $data[ $target ];
 			} elseif( $type == 'if' ) {
 				if( ! $slash ) {
-					if( $state['skip'] ) {
+					if( $skip ) {
 						// we're already skipping this block, just throw away the parsing
 						$this->parse( $tmpl, $data, $matches, $state );
-						$state['skip'] = true; // make sure this persists
+						$skip = true; // force this back to true, in case the above
+						              // parse modified it.
 						continue;
 					}
 
-					$prev_skip = $state['skip'];
-					$state['skip'] = (bool)$data[$target] == false;
+					$skip = (bool)$data[$target] == false;
 
 					$html .= $this->parse( $tmpl, $data, $matches, $state );
-					$state['skip'] = $prev_skip;
 				}
 
 				// closing tag
 				else {
-					$state['depth'] -= 1;
+					$depth -= 1;
 					return $html;
 				}
 			} elseif( $type == 'else' ) {
@@ -146,15 +149,15 @@ class jqTmpl {
 				
 				// flip skip from the parent; if the parent {{if}} showed, we want to hide,
 				// and vice-versa
-				$state['skip'] = !$state['skip'];
+				$skip = !$skip;
 
 				// let processing continue as normal
 			}
 
-			$this->debug( "remaining pattern: [%s]", substr($tmpl, $state['pos']) );
+			$this->debug( "remaining pattern: [%s]", substr($tmpl, $pos) );
 		}
 
-		$state['depth'] -= 1;
+		$depth -= 1;
 		return $html;
 	}//end parse
 
