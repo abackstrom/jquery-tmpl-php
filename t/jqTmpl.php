@@ -118,19 +118,53 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		);
 	}
 
-	function testTags() {
+	function testIf() {
 		$t = new jqTmpl;
 
 		$this->assertEquals(
-			'yes',
-			$t->tmpl( '{{if foo}}yes{{/if}}', array('foo' => 'yes') ),
+			'outside in if outside',
+			$t->tmpl( 'outside {{if foo}}in if{{/if}} outside', array('foo' => 'yes') ),
 			'true if condition'
 		);
 
 		$this->assertEquals(
-			'no',
-			$t->tmpl( 'no{{if foo}}yes{{/if}}', array('foo' => false) ),
+			'outside  outside',
+			$t->tmpl( 'outside {{if foo}}yes{{/if}} outside', array('foo' => false) ),
 			'false if condition'
+		);
+
+		$this->assertEquals(
+			'outside in else outside',
+			$t->tmpl( 'outside {{if foo}}in if{{else}}in else{{/if}} outside', array('foo' => false) ),
+			'else condition'
+		);
+
+		$this->assertEquals(
+			'outelse1out',
+			$t->tmpl( 'out{{if foo}}if1{{if foo}}if2{{else}}else2{{/if}}{{else}}else1{{/if}}out', array('foo' => false) ),
+			'nested {{if}}, outer {{if}} false'
+		);
+
+		$this->assertEquals(
+			'out-else1-else1if-out',
+			$t->tmpl( 'out-{{if foo}}if1-{{if foo}}if2-{{else}}if2else-{{/if}}{{else}}else1-{{if bar}}else1if-{{else}}else1else-{{/if}}{{/if}}out', array('foo' => false, 'bar' => true) ),
+			'nested {{if}}, outer {{if}} false, nesting in {{else}}'
+		);
+	}
+
+	function testExpression() {
+		$t = new jqTmpl;
+
+		$this->assertEquals(
+			'<i>War &amp; Peace</i>',
+			$t->tmpl( '<i>${title}</i>', array('title' => 'War & Peace') ),
+			'escaped expression'
+		);
+
+		$this->assertEquals(
+			'<i>War & Peace</i>',
+			$t->tmpl( '<i>{{html title}}</i>', array('title' => 'War & Peace') ),
+			'unescaped expression'
 		);
 	}
 }
