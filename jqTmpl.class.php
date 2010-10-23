@@ -164,7 +164,7 @@ class jqTmpl {
 				// let processing continue as normal
 			}
 
-			// {{each}}, {{/each}}
+			// {{each foo}}, {{each(i, b) foo}}, {{/each}}
 			elseif( $type == 'each' ) {
 				if( $slash ) {
 					return $html;
@@ -178,14 +178,24 @@ class jqTmpl {
 				$reset_pos = $pos;
 				$data_copy = $data;
 
+				if( $match['fnargs'][0] ) {
+					list($index_name, $value_name) = explode(',', $match['fnargs'][0]);
+
+					$index_name = trim($index_name);
+					$value_name = trim($value_name);
+				} else {
+					$index_name = 'index';
+					$value_name = 'value';
+				}
+
 				// repeat the loop over this each block
 				foreach( $data[$target] as $index => $value ) {
 					// reset first so last iteration ends in the correct place
 					$matches = $reset_matches;
 					$pos = $reset_pos;
 
-					$data_copy['index'] = $index;
-					$data_copy['value'] = $value;
+					$data_copy[$index_name] = $index;
+					$data_copy[$value_name] = $value;
 
 					$html .= $this->parse( $tmpl, $data_copy, $matches, $state);
 				}

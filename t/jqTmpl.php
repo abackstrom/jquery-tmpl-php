@@ -174,11 +174,19 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		$data = array(
 			'books' => array('one', 'two', 'three')
 		);
-
 		$this->assertEquals(
 			'out-one-two-three-out',
 			$t->tmpl( 'out-{{each books}}${value}-{{/each}}out', $data ),
-			'simple each'
+			'simple {{each}} values'
+		);
+
+		$data = array(
+			'books' => array('one', 'two', 'three')
+		);
+		$this->assertEquals(
+			'out-0-1-2-out',
+			$t->tmpl( 'out-{{each books}}${index}-{{/each}}out', $data ),
+			'simple {{each}} indexes'
 		);
 
 		$data = array(
@@ -200,11 +208,24 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 				'crazy' => array('asdf', 'fffs', 'bbq')
 			)
 		);
-
 		$this->assertEquals(
 			'out-helen-francis-margaret-fallon-ceylon-morley-asdf-fffs-bbq-out',
 			$t->tmpl( 'out-{{each names}}{{each value}}${value}-{{/each}}{{/each}}out', $data ),
 			'nested each'
+		);
+
+		$data = array(
+			'books' => array('one', 'two', 'three')
+		);
+		$this->assertEquals(
+			'out-0-one-1-two-2-three-out',
+			$t->tmpl( 'out-{{each(i,b) books}}${i}-${b}-{{/each}}out', $data ),
+			'custom {{each}} params'
+		);
+		$this->assertEquals(
+			'out-0-one-1-two-2-three-out',
+			$t->tmpl( 'out-{{each( i, b ) books}}${i}-${b}-{{/each}}out', $data ),
+			'custom {{each}} params (whitespace)'
 		);
 	}
 
