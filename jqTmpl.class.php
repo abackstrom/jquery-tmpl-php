@@ -111,7 +111,7 @@ class jqTmpl {
 			$target = isset($match['target']) ? $match['target'][0] : null;
 			$slash = $match['slash'][0] == '/';
 
-			$this->debug("type is [%s]; target is [%s]\n", $type, $target);
+			$this->debug("type is [%s%s]; target is [%s]\n", $slash ? '/' : '', $type, $target);
 
 			// move string position after the template tag
 			$pos = $match[0][1] + strlen($match[0][0]);
@@ -152,6 +152,32 @@ class jqTmpl {
 				$skip = !$skip;
 
 				// let processing continue as normal
+			} elseif( $type == 'each' ) {
+				if( $slash ) {
+					return $html;
+				}
+
+				if( ! $data[$target] ) {
+					continue;
+				}
+
+				$reset_matches = $matches;
+				$reset_pos = $pos;
+				$data_copy = $data;
+
+				// repeat the loop over this each block
+				foreach( $data[$target] as $index => $value ) {
+					// reset first so last iteration ends in the correct place
+					$matches = $reset_matches;
+					$pos = $reset_pos;
+
+					$data_copy['index'] = $index;
+					$data_copy['value'] = $value;
+
+					$html .= $this->parse( $tmpl, $data_copy, $matches, $state);
+				}
+			} elseif( $type == '!' ) {
+				// "comment tag, skipped by parser"
 			}
 
 			$this->debug( "remaining pattern: [%s]", substr($tmpl, $pos) );

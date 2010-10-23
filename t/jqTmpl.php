@@ -167,4 +167,60 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 			'unescaped expression'
 		);
 	}
+
+	function testEach() {
+		$t = new jqTmpl;
+
+		$data = array(
+			'books' => array('one', 'two', 'three')
+		);
+
+		$this->assertEquals(
+			'out-one-two-three-out',
+			$t->tmpl( 'out-{{each books}}${value}-{{/each}}out', $data ),
+			'simple each'
+		);
+
+		$data = array(
+			'strs' => array(
+				'some' => 'thing',
+				'other' => 'stuff'
+			)
+		);
+		$this->assertEquals(
+			'out-some-thing-other-stuff-out',
+			$t->tmpl( 'out-{{each strs}}${index}-${value}-{{/each}}out', $data ),
+			'nested each'
+		);
+
+		$data = array(
+			'names' => array(
+				'old' => array('helen', 'francis', 'margaret'),
+				'new' => array('fallon', 'ceylon', 'morley'),
+				'crazy' => array('asdf', 'fffs', 'bbq')
+			)
+		);
+
+		$this->assertEquals(
+			'out-helen-francis-margaret-fallon-ceylon-morley-asdf-fffs-bbq-out',
+			$t->tmpl( 'out-{{each names}}{{each value}}${value}-{{/each}}{{/each}}out', $data ),
+			'nested each'
+		);
+	}
+
+	function testComment() {
+		$t = new jqTmpl;
+
+		$this->assertEquals(
+			'',
+			$t->tmpl( '{{! test }}' ),
+			'comment only'
+		);
+
+		$this->assertEquals(
+			'out-yes-out',
+			$t->tmpl( 'out-{{if foo}}{{! test }}{{= foo}}-{{/if}}out', array('foo' => 'yes') ),
+			'more complex comment'
+		);
+	}
 }
