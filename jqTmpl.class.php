@@ -42,7 +42,7 @@ class jqTmpl {
 	 *    $tpl->tmpl( $tpl->pq('#which'), array('fruit' => 'Donuts')); // "Mmm, Donuts"
 	 *
 	 * @param $tmpl string|phpQueryObject a template as a string or a phpQuery selection
-	 * @param $data array associative array of data to populate into the template
+	 * @param $data array array of data to populate into the template
 	 * @return the rendered template string
 	 */
 	public function tmpl( $tmpl, $data = array(), $options = array() ) {
@@ -51,6 +51,11 @@ class jqTmpl {
 		} elseif( $tmpl instanceof phpQueryObject ) {
 			$tmpl_string = $tmpl->eq(0)->html();
 		}
+
+		$defaults = array(
+			'render_once' => true // need to figure out which value is sane
+		);
+		$options = array_merge($defaults, $options);
 
 		$tmpl_string = $this->preparse( $tmpl_string );
 
@@ -64,7 +69,18 @@ class jqTmpl {
 			'depth' => 0,                  // recursion depth
 		);
 
-		$html = $this->parse( $tmpl_string, $data, $matches, $state );
+		if( $options['render_once'] ) {
+			$html = $this->parse( $tmpl_string, $data, $matches, $state );
+		} else {
+			$html = '';
+
+			foreach( $data as $row ) {
+				$state_this = $state; // reset this pass-by-reference var 
+				$matches_this = $matches;
+
+				$html .= $this->parse( $tmpl_string, $row, $matches_this, $state_this );
+			}
+		}
 
 		return $html;
 	}//end tmpl

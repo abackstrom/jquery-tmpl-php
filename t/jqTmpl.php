@@ -64,6 +64,12 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 			$t->tmpl('${ foo }, {{= name }}', array('foo' => 'bar', 'name' => 'adam')),
 			'tags with extra whitespace'
 		);
+
+		$this->assertEquals(
+			'foobarblee',
+			$t->tmpl( '{{= name}}', array(array('name' => 'foo'), array('name' => 'bar'), array('name' => 'blee')), array('render_once' => false)),
+			'repeating over data argument'
+		);
 	}
 
 	function testPhpQuery() {
