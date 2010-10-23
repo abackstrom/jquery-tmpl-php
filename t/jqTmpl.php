@@ -223,4 +223,12 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 			'more complex comment'
 		);
 	}
+
+	/**
+	 * @expectedException UnknownTagException
+	 */
+	function testUnknownType() {
+		$t = new jqTmpl;
+		$t->tmpl( '{{foo}}' );
+	}
 }

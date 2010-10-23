@@ -120,11 +120,18 @@ class jqTmpl {
 			// what is our template tag?
 			//
 
+			// {{= expression}}
 			if( $type == '=' && $skip == 0 ) {
 				$html .= htmlentities($data[ $target ]);
-			} elseif( $type == 'html' && $skip == 0 ) {
+			}
+			
+			// {{html expression}}
+			elseif( $type == 'html' && $skip == 0 ) {
 				$html .= $data[ $target ];
-			} elseif( $type == 'if' ) {
+			}
+
+			// {{if}}, {{/if}}
+			elseif( $type == 'if' ) {
 				if( ! $slash ) {
 					if( $skip ) {
 						// we're already skipping this block, just throw away the parsing
@@ -144,7 +151,10 @@ class jqTmpl {
 					$depth -= 1;
 					return $html;
 				}
-			} elseif( $type == 'else' ) {
+			}
+
+			// {{else}}
+			elseif( $type == 'else' ) {
 				// this will happen in a recursed parse()
 				
 				// flip skip from the parent; if the parent {{if}} showed, we want to hide,
@@ -152,7 +162,10 @@ class jqTmpl {
 				$skip = !$skip;
 
 				// let processing continue as normal
-			} elseif( $type == 'each' ) {
+			}
+
+			// {{each}}, {{/each}}
+			elseif( $type == 'each' ) {
 				if( $slash ) {
 					return $html;
 				}
@@ -176,8 +189,16 @@ class jqTmpl {
 
 					$html .= $this->parse( $tmpl, $data_copy, $matches, $state);
 				}
-			} elseif( $type == '!' ) {
+			}
+
+			// {{! comment}}
+			elseif( $type == '!' ) {
 				// "comment tag, skipped by parser"
+			}
+
+			// unknown type
+			else {
+				throw new UnknownTagException("Template command not found: " . $type);
 			}
 
 			$this->debug( "remaining pattern: [%s]", substr($tmpl, $pos) );
@@ -229,3 +250,5 @@ class jqTmpl {
 		return $tmpl;
 	}//end preparse
 }//end class jqTmpl
+
+class UnknownTagException extends RuntimeException { }
