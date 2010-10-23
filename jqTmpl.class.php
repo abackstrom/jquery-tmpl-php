@@ -201,6 +201,17 @@ class jqTmpl {
 				}
 			}
 
+			// {{tmpl "#foo"}}
+			elseif( $type == 'tmpl' ) {
+				if( $skip ) {
+					continue;
+				}
+
+				$target = trim($target, '\'"');
+
+				$html .= $this->tmpl( $this->pq($target), $data );
+			}
+
 			// {{! comment}}
 			elseif( $type == '!' ) {
 				// "comment tag, skipped by parser"

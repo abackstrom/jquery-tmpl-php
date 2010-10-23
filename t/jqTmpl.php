@@ -245,6 +245,55 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		);
 	}
 
+	function testSubTemplate() {
+		$t = new jqTmpl;
+
+		$t->load_document('<script id="foo">foo</script><script id="bar">{{tmpl "#foo"}}</script>');
+		$this->assertEquals(
+			'foo',
+			$t->tmpl( $t->pq('#bar') ),
+			'simple subtemplate'
+		);
+
+		$t->load_document('<script id="foo">foo</script><script id="bar">bar-{{tmpl "#foo"}}-bar</script>');
+		$this->assertEquals(
+			'bar-foo-bar',
+			$t->tmpl( $t->pq('#bar') ),
+			'content before and after subtemplate'
+		);
+
+		$t->load_document('<script id="inner">inner-${bar}-inner</script><script id="outer">outer-{{tmpl "#inner"}}-outer</script>');
+		$this->assertEquals(
+			'outer-inner-foo-inner-outer',
+			$t->tmpl( $t->pq('#outer'), array('bar' => 'foo') ),
+			'expression in subtemplate'
+		);
+
+		$t->load_document('<script id="inner">inner</script><script id="outer">outer-{{if foo}}{{tmpl "#inner"}}{{/if}}-outer</script>');
+		$this->assertEquals(
+			'outer-inner-outer',
+			$t->tmpl( $t->pq('#outer'), array('foo' => true) ),
+			'{{tmpl}} in {{if}}, true condition'
+		);
+		$this->assertEquals(
+			'outer--outer',
+			$t->tmpl( $t->pq('#outer'), array('foo' => false) ),
+			'{{tmpl}} in {{if}}, false condition'
+		);
+
+		$t->load_document('<script id="inner">inner</script><script id="outer">outer-{{if foo}}foo{{else}}{{tmpl "#inner"}}{{/if}}-outer</script>');
+		$this->assertEquals(
+			'outer-foo-outer',
+			$t->tmpl( $t->pq('#outer'), array('foo' => true) ),
+			'{{tmpl}} in {{else}}, true {{if}} condition'
+		);
+		$this->assertEquals(
+			'outer-inner-outer',
+			$t->tmpl( $t->pq('#outer'), array('foo' => false) ),
+			'{{tmpl}} in {{else}}, true {{if}} condition'
+		);
+	}
+
 	/**
 	 * @expectedException UnknownTagException
 	 */
