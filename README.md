@@ -5,9 +5,12 @@ An attempt at implementing jquery-tmpl in PHP.
 
 * [jquery-tmpl](http://github.com/jquery/jquery-tmpl)
 
-Supported syntax:
+Syntax
+------
 
-* `${foo}, `{{= foo}}`
+jquery-tmpl is implemented by converting template code into valid JavaScript. As such, a number of the features do not translate well to PHP, such as the variety of places you can insert a function into jquery-tmpl template tags. The jqTmpl class supports the following subset of jquery-tmpl syntax:
+
+* `${foo}`, `{{= foo}}`
 * `{{html bar}}`
 * `{{if foo}}`
 * `{{else}}`
@@ -15,13 +18,16 @@ Supported syntax:
 * `{{tmpl "selector"}}`, ie. `{{tmpl "#baz"}}`
 * `{{each foo}}`, `{{each(k,v) foo}}`
 
-Still unsupported:
+Known unsupported:
 
 * `{{tmpl(foo) "#bar"}}` -- data parameter to nested template
+* `{{= func()}}` -- functions in template tags
+* `{{= $item.func()}}` -- functions in options parameter to jqTmpl::tmpl()
 
-Possibly volatile:
+Caveats
+-------
 
-* This project does not currently treat objects and arrays the same way jquery-tmpl treats those data types. For example, jquery-tmpl will render the template multiple times if you pass in an array of objects. jquery-tmpl-php should be modified to treat an input object differently than an input array, and remove the render_once option to jqTmpl::tmpl().
+This project does not currently treat objects and arrays the same way jquery-tmpl treats those data types. For example, jquery-tmpl will render the template multiple times if you pass in an array of objects. jquery-tmpl-php should be modified to treat an input object differently than an input array, and remove the render_once option to jqTmpl::tmpl().
 
 Dependencies
 ------------
