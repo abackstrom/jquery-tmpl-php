@@ -188,41 +188,6 @@ class jqTmpl {
 	}//end parse
 
 	/**
-	 * Check to see what the next tag is.
-	 * @param $matches array the array of matches
-	 * @return string name of the next template tag
-	 */
-	public function peek_next_tag( &$matches ) {
-		if( count($matches) == 0 ) {
-			return null;
-		}
-
-		return $matches[0]['type'][0];
-	}//end peek_next_tag
-
-	/**
-	 * Move to the next tag.
-	 *
-	 * @param $matches array the array of matches
-	 * @param $state array the parsing state
-	 */
-	public function moveto_next_tag( &$matches, &$state ) {
-	}//end moveto_next_tag
-
-	/**
-	 * Jump to the next template tag.
-	 *
-	 * @param $matches array the array of matches
-	 * @param $state array the parsing state
-	 * @param $html string that will receive any content leading up to the next tag; omit to ignore this content
-	 * @return the next template tag
-	 */
-	public function next_tag( &$matches, &$state, &$html = null ) {
-
-		return $match;
-	}//end next_tag
-
-	/**
 	 * Debug function.
 	 */
 	public function debug() {
