@@ -45,17 +45,12 @@ class jqTmpl {
 	 * @param $data array array of data to populate into the template
 	 * @return the rendered template string
 	 */
-	public function tmpl( $tmpl, $data = array(), $options = array() ) {
+	public function tmpl( $tmpl, $data = null, $options = array() ) {
 		if( is_string($tmpl) ) {
 			$tmpl_string = $tmpl;
 		} elseif( $tmpl instanceof phpQueryObject ) {
 			$tmpl_string = $tmpl->eq(0)->html();
 		}
-
-		$defaults = array(
-			'render_once' => true // need to figure out which value is sane
-		);
-		$options = array_merge($defaults, $options);
 
 		$tmpl_string = $this->preparse( $tmpl_string );
 
@@ -69,9 +64,9 @@ class jqTmpl {
 			'depth' => 0,                  // recursion depth
 		);
 
-		if( $options['render_once'] ) {
+		if( is_object($data) || ! isset($data) ) {
 			$html = $this->parse( $tmpl_string, $data, $matches, $state );
-		} else {
+		} elseif( is_array($data) ) {
 			$html = '';
 
 			foreach( $data as $row ) {
@@ -80,6 +75,8 @@ class jqTmpl {
 
 				$html .= $this->parse( $tmpl_string, $row, $matches_this, $state_this );
 			}
+		} else {
+			throw new UnsupportedDataTypeException;
 		}
 
 		return $html;
@@ -138,12 +135,12 @@ class jqTmpl {
 
 			// {{= expression}}
 			if( $type == '=' && $skip == 0 ) {
-				$html .= htmlentities($data[ $target ]);
+				$html .= htmlentities($data->$target);
 			}
 			
 			// {{html expression}}
 			elseif( $type == 'html' && $skip == 0 ) {
-				$html .= $data[ $target ];
+				$html .= $data->$target;
 			}
 
 			// {{if}}, {{/if}}
@@ -157,7 +154,7 @@ class jqTmpl {
 						continue;
 					}
 
-					$skip = (bool)$data[$target] == false;
+					$skip = (bool)$data->$target == false;
 
 					$html .= $this->parse( $tmpl, $data, $matches, $state );
 				}
@@ -186,7 +183,7 @@ class jqTmpl {
 					return $html;
 				}
 
-				if( ! $data[$target] ) {
+				if( ! $data->$target ) {
 					continue;
 				}
 
@@ -205,13 +202,13 @@ class jqTmpl {
 				}
 
 				// repeat the loop over this each block
-				foreach( $data[$target] as $index => $value ) {
+				foreach( $data->$target as $index => $value ) {
 					// reset first so last iteration ends in the correct place
 					$matches = $reset_matches;
 					$pos = $reset_pos;
 
-					$data_copy[$index_name] = $index;
-					$data_copy[$value_name] = $value;
+					$data_copy->$index_name = $index;
+					$data_copy->$value_name = $value;
 
 					$html .= $this->parse( $tmpl, $data_copy, $matches, $state);
 				}
@@ -289,3 +286,4 @@ class jqTmpl {
 }//end class jqTmpl
 
 class UnknownTagException extends RuntimeException { }
+class UnsupportedDataTypeException extends RuntimeException { }

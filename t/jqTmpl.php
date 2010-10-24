@@ -43,32 +43,26 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(
 			'foofoofoo',
-			$t->tmpl('foo{{= blah}}foo', array('blah' => 'foo')),
+			$t->tmpl('foo{{= blah}}foo', (object)array('blah' => 'foo')),
 			'tag nested in text'
 		);
 
 		$this->assertEquals(
 			'bar',
-			$t->tmpl('${foo}', array('foo' => 'bar')),
+			$t->tmpl('${foo}', (object)array('foo' => 'bar')),
 			'simple substitution'
 		);
 
 		$this->assertEquals(
 			'bar, adam',
-			$t->tmpl('${foo}, {{= name}}', array('foo' => 'bar', 'name' => 'adam')),
+			$t->tmpl('${foo}, {{= name}}', (object)array('foo' => 'bar', 'name' => 'adam')),
 			'two tags'
 		);
 
 		$this->assertEquals(
 			'bar, adam',
-			$t->tmpl('${ foo }, {{= name }}', array('foo' => 'bar', 'name' => 'adam')),
+			$t->tmpl('${ foo }, {{= name }}', (object)array('foo' => 'bar', 'name' => 'adam')),
 			'tags with extra whitespace'
-		);
-
-		$this->assertEquals(
-			'foobarblee',
-			$t->tmpl( '{{= name}}', array(array('name' => 'foo'), array('name' => 'bar'), array('name' => 'blee')), array('render_once' => false)),
-			'repeating over data argument'
 		);
 	}
 
@@ -106,13 +100,13 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(
 			'nanu',
-			$t->tmpl( $t->pq('#shazbot'), array('greeting' => 'nanu') ),
+			$t->tmpl( $t->pq('#shazbot'), (object)array('greeting' => 'nanu') ),
 			'query by id'
 		);
 
 		$this->assertEquals(
 			'adam',
-			$t->tmpl( $t->pq('script'), array('bar' => 'adam') ),
+			$t->tmpl( $t->pq('script'), (object)array('bar' => 'adam') ),
 			'query uses first found node'
 		);
 
@@ -120,7 +114,27 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		$t->load_document($html);
 		$this->assertEquals(
 			'<i>bar</i>',
-			$t->tmpl( $t->pq(), array('foo' => 'bar') )
+			$t->tmpl( $t->pq(), (object)array('foo' => 'bar') )
+		);
+	}
+
+	function testDataArray() {
+		$t = new jqTmpl;
+
+		$this->assertEquals(
+			'foobarblee',
+			$t->tmpl( '{{= name}}', array((object)array('name' => 'foo'), (object)array('name' => 'bar'), (object)array('name' => 'blee'))),
+			'repeating over data argument'
+		);
+	}
+
+	function testDataObject() {
+		$t = new jqTmpl;
+
+		$this->assertEquals(
+			'onetwo',
+			$t->tmpl( '{{= foo}}{{= bar}}', (object)array('foo' => 'one', 'bar' => 'two')),
+			'repeating over data argument'
 		);
 	}
 
@@ -129,31 +143,31 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(
 			'outside in if outside',
-			$t->tmpl( 'outside {{if foo}}in if{{/if}} outside', array('foo' => 'yes') ),
+			$t->tmpl( 'outside {{if foo}}in if{{/if}} outside', (object)array('foo' => 'yes') ),
 			'true if condition'
 		);
 
 		$this->assertEquals(
 			'outside  outside',
-			$t->tmpl( 'outside {{if foo}}yes{{/if}} outside', array('foo' => false) ),
+			$t->tmpl( 'outside {{if foo}}yes{{/if}} outside', (object)array('foo' => false) ),
 			'false if condition'
 		);
 
 		$this->assertEquals(
 			'outside in else outside',
-			$t->tmpl( 'outside {{if foo}}in if{{else}}in else{{/if}} outside', array('foo' => false) ),
+			$t->tmpl( 'outside {{if foo}}in if{{else}}in else{{/if}} outside', (object)array('foo' => false) ),
 			'else condition'
 		);
 
 		$this->assertEquals(
 			'outelse1out',
-			$t->tmpl( 'out{{if foo}}if1{{if foo}}if2{{else}}else2{{/if}}{{else}}else1{{/if}}out', array('foo' => false) ),
+			$t->tmpl( 'out{{if foo}}if1{{if foo}}if2{{else}}else2{{/if}}{{else}}else1{{/if}}out', (object)array('foo' => false) ),
 			'nested {{if}}, outer {{if}} false'
 		);
 
 		$this->assertEquals(
 			'out-else1-else1if-out',
-			$t->tmpl( 'out-{{if foo}}if1-{{if foo}}if2-{{else}}if2else-{{/if}}{{else}}else1-{{if bar}}else1if-{{else}}else1else-{{/if}}{{/if}}out', array('foo' => false, 'bar' => true) ),
+			$t->tmpl( 'out-{{if foo}}if1-{{if foo}}if2-{{else}}if2else-{{/if}}{{else}}else1-{{if bar}}else1if-{{else}}else1else-{{/if}}{{/if}}out', (object)array('foo' => false, 'bar' => true) ),
 			'nested {{if}}, outer {{if}} false, nesting in {{else}}'
 		);
 	}
@@ -163,13 +177,13 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(
 			'<i>War &amp; Peace</i>',
-			$t->tmpl( '<i>${title}</i>', array('title' => 'War & Peace') ),
+			$t->tmpl( '<i>${title}</i>', (object)array('title' => 'War & Peace') ),
 			'escaped expression'
 		);
 
 		$this->assertEquals(
 			'<i>War & Peace</i>',
-			$t->tmpl( '<i>{{html title}}</i>', array('title' => 'War & Peace') ),
+			$t->tmpl( '<i>{{html title}}</i>', (object)array('title' => 'War & Peace') ),
 			'unescaped expression'
 		);
 	}
@@ -177,7 +191,7 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 	function testEach() {
 		$t = new jqTmpl;
 
-		$data = array(
+		$data = (object)array(
 			'books' => array('one', 'two', 'three')
 		);
 		$this->assertEquals(
@@ -185,17 +199,13 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 			$t->tmpl( 'out-{{each books}}${value}-{{/each}}out', $data ),
 			'simple {{each}} values'
 		);
-
-		$data = array(
-			'books' => array('one', 'two', 'three')
-		);
 		$this->assertEquals(
 			'out-0-1-2-out',
 			$t->tmpl( 'out-{{each books}}${index}-{{/each}}out', $data ),
 			'simple {{each}} indexes'
 		);
 
-		$data = array(
+		$data = (object)array(
 			'strs' => array(
 				'some' => 'thing',
 				'other' => 'stuff'
@@ -207,7 +217,7 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 			'nested each'
 		);
 
-		$data = array(
+		$data = (object)array(
 			'names' => array(
 				'old' => array('helen', 'francis', 'margaret'),
 				'new' => array('fallon', 'ceylon', 'morley'),
@@ -220,7 +230,7 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 			'nested each'
 		);
 
-		$data = array(
+		$data = (object)array(
 			'books' => array('one', 'two', 'three')
 		);
 		$this->assertEquals(
@@ -246,7 +256,7 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(
 			'out-yes-out',
-			$t->tmpl( 'out-{{if foo}}{{! test }}{{= foo}}-{{/if}}out', array('foo' => 'yes') ),
+			$t->tmpl( 'out-{{if foo}}{{! test }}{{= foo}}-{{/if}}out', (object)array('foo' => 'yes') ),
 			'more complex comment'
 		);
 	}
@@ -271,31 +281,31 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		$t->load_document('<script id="inner">inner-${bar}-inner</script><script id="outer">outer-{{tmpl "#inner"}}-outer</script>');
 		$this->assertEquals(
 			'outer-inner-foo-inner-outer',
-			$t->tmpl( $t->pq('#outer'), array('bar' => 'foo') ),
+			$t->tmpl( $t->pq('#outer'), (object)array('bar' => 'foo') ),
 			'expression in subtemplate'
 		);
 
 		$t->load_document('<script id="inner">inner</script><script id="outer">outer-{{if foo}}{{tmpl "#inner"}}{{/if}}-outer</script>');
 		$this->assertEquals(
 			'outer-inner-outer',
-			$t->tmpl( $t->pq('#outer'), array('foo' => true) ),
+			$t->tmpl( $t->pq('#outer'), (object)array('foo' => true) ),
 			'{{tmpl}} in {{if}}, true condition'
 		);
 		$this->assertEquals(
 			'outer--outer',
-			$t->tmpl( $t->pq('#outer'), array('foo' => false) ),
+			$t->tmpl( $t->pq('#outer'), (object)array('foo' => false) ),
 			'{{tmpl}} in {{if}}, false condition'
 		);
 
 		$t->load_document('<script id="inner">inner</script><script id="outer">outer-{{if foo}}foo{{else}}{{tmpl "#inner"}}{{/if}}-outer</script>');
 		$this->assertEquals(
 			'outer-foo-outer',
-			$t->tmpl( $t->pq('#outer'), array('foo' => true) ),
+			$t->tmpl( $t->pq('#outer'), (object)array('foo' => true) ),
 			'{{tmpl}} in {{else}}, true {{if}} condition'
 		);
 		$this->assertEquals(
 			'outer-inner-outer',
-			$t->tmpl( $t->pq('#outer'), array('foo' => false) ),
+			$t->tmpl( $t->pq('#outer'), (object)array('foo' => false) ),
 			'{{tmpl}} in {{else}}, true {{if}} condition'
 		);
 	}

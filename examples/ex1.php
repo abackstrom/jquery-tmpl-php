@@ -17,8 +17,8 @@ EOF;
 $t->load_document($html);
 
 $data = array(
-	array("Name" => "The Red Violin", "Director" => "Francois Girard"),
-	array("Name" => "Eyes Wide Shut", "Director" => "Stanley Kubrick"),
-	array("Name" => "The Inheritance", "Director" => "Mauro Bolognini")
+	(object)array("Name" => "The Red Violin", "Director" => "Francois Girard"),
+	(object)array("Name" => "Eyes Wide Shut", "Director" => "Stanley Kubrick"),
+	(object)array("Name" => "The Inheritance", "Director" => "Mauro Bolognini")
 );
-echo $t->tmpl( $t->pq('#movieTemplate'), $data, array('render_once' => false) );
+echo $t->tmpl( $t->pq('#movieTemplate'), $data );

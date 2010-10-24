@@ -24,11 +24,6 @@ Known unsupported:
 * `{{= func()}}` -- functions in template tags
 * `{{= $item.func()}}` -- functions in options parameter to jqTmpl::tmpl()
 
-Caveats
--------
-
-This project does not currently treat objects and arrays the same way jquery-tmpl treats those data types. For example, jquery-tmpl will render the template multiple times if you pass in an array of objects. jquery-tmpl-php should be modified to treat an input object differently than an input array, and remove the render_once option to jqTmpl::tmpl().
-
 Dependencies
 ------------
 
@@ -60,9 +55,9 @@ Examples
 	$t->load_document($html);
 
 	$data = array(
-		array("Name" => "The Red Violin", "Director" => "Francois Girard"),
-		array("Name" => "Eyes Wide Shut", "Director" => "Stanley Kubrick"),
-		array("Name" => "The Inheritance", "Director" => "Mauro Bolognini")
+		(object)array("Name" => "The Red Violin", "Director" => "Francois Girard"),
+		(object)array("Name" => "Eyes Wide Shut", "Director" => "Stanley Kubrick"),
+		(object)array("Name" => "The Inheritance", "Director" => "Mauro Bolognini")
 	);
 
 	echo $t->tmpl( $t->pq('#movieTemplate'), $data, array('render_once' => false) );
