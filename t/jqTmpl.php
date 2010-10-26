@@ -42,6 +42,12 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		);
 
 		$this->assertEquals(
+			'<td>foo</td>',
+			$t->tmpl('<td>foo</td>'),
+			'no substitutions, html'
+		);
+
+		$this->assertEquals(
 			'foofoofoo',
 			$t->tmpl('foo{{= blah}}foo', (object)array('blah' => 'foo')),
 			'tag nested in text'
@@ -66,31 +72,28 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		);
 	}
 
-	function testPhpQuery() {
+	function testDomSelection() {
 		$t = new jqTmpl;
 
-		$html = '<div id="foo">is foo</div><div id="bar">is bar</div>';
-		
-		$this->assertInstanceOf(
-			'phpQueryObject',
-			$t->load_document($html)
+		$t->load_document('<div id="one">foo</div><div id="two">bar</div>');
+
+		$this->assertEquals(
+			'bar',
+			$t->tmpl_by_id('two'),
+			'select by id, no hash'
 		);
 
 		$this->assertEquals(
-			1,
-			count($t->pq('#foo'))
-		);
-
-		$this->assertEquals(
-			'is foo',
-			$t->pq('#foo')->text()
+			'bar',
+			$t->tmpl_by_id('#two'),
+			'select by id, hash'
 		);
 	}
 
 	/**
-	 * @depends testPhpQuery
+	 * @depends testDomSelection
 	 */
-	function testTemplateFromPhpQuery() {
+	function testTemplateFromDom() {
 		$t = new jqTmpl;
 
 		$html = '<script type="text/x-jquery-tmpl" id="foo">${bar}</script>' .
@@ -100,21 +103,18 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(
 			'nanu',
-			$t->tmpl( $t->pq('#shazbot'), (object)array('greeting' => 'nanu') ),
+			$t->tmpl( '#shazbot', (object)array('greeting' => 'nanu') ),
 			'query by id'
 		);
 
-		$this->assertEquals(
-			'adam',
-			$t->tmpl( $t->pq('script'), (object)array('bar' => 'adam') ),
-			'query uses first found node'
-		);
+		$html = '<script type="text/x-jquery-tmpl" id="foo"><td>${bar}</td></script>';
 
-		$html = '<i>${foo}</i>';
 		$t->load_document($html);
+
 		$this->assertEquals(
-			'<i>bar</i>',
-			$t->tmpl( $t->pq(), (object)array('foo' => 'bar') )
+			'<td>pit</td>',
+			$t->tmpl( '#foo', (object)array('bar' => 'pit') ),
+			'dom parser allows ETAGO </'
 		);
 	}
 
@@ -267,45 +267,45 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		$t->load_document('<script id="foo">foo</script><script id="bar">{{tmpl "#foo"}}</script>');
 		$this->assertEquals(
 			'foo',
-			$t->tmpl( $t->pq('#bar') ),
+			$t->tmpl( '#bar' ),
 			'simple subtemplate'
 		);
 
 		$t->load_document('<script id="foo">foo</script><script id="bar">bar-{{tmpl "#foo"}}-bar</script>');
 		$this->assertEquals(
 			'bar-foo-bar',
-			$t->tmpl( $t->pq('#bar') ),
+			$t->tmpl( '#bar' ),
 			'content before and after subtemplate'
 		);
 
 		$t->load_document('<script id="inner">inner-${bar}-inner</script><script id="outer">outer-{{tmpl "#inner"}}-outer</script>');
 		$this->assertEquals(
 			'outer-inner-foo-inner-outer',
-			$t->tmpl( $t->pq('#outer'), (object)array('bar' => 'foo') ),
+			$t->tmpl( '#outer', (object)array('bar' => 'foo') ),
 			'expression in subtemplate'
 		);
 
 		$t->load_document('<script id="inner">inner</script><script id="outer">outer-{{if foo}}{{tmpl "#inner"}}{{/if}}-outer</script>');
 		$this->assertEquals(
 			'outer-inner-outer',
-			$t->tmpl( $t->pq('#outer'), (object)array('foo' => true) ),
+			$t->tmpl( '#outer', (object)array('foo' => true) ),
 			'{{tmpl}} in {{if}}, true condition'
 		);
 		$this->assertEquals(
 			'outer--outer',
-			$t->tmpl( $t->pq('#outer'), (object)array('foo' => false) ),
+			$t->tmpl( '#outer', (object)array('foo' => false) ),
 			'{{tmpl}} in {{if}}, false condition'
 		);
 
 		$t->load_document('<script id="inner">inner</script><script id="outer">outer-{{if foo}}foo{{else}}{{tmpl "#inner"}}{{/if}}-outer</script>');
 		$this->assertEquals(
 			'outer-foo-outer',
-			$t->tmpl( $t->pq('#outer'), (object)array('foo' => true) ),
+			$t->tmpl( '#outer', (object)array('foo' => true) ),
 			'{{tmpl}} in {{else}}, true {{if}} condition'
 		);
 		$this->assertEquals(
 			'outer-inner-outer',
-			$t->tmpl( $t->pq('#outer'), (object)array('foo' => false) ),
+			$t->tmpl( '#outer', (object)array('foo' => false) ),
 			'{{tmpl}} in {{else}}, true {{if}} condition'
 		);
 	}

@@ -34,6 +34,20 @@ class jqTmpl {
 	}//end load_document
 
 	/**
+	 * Fetch a template from the loaded DOM document by its id.
+	 *
+	 * @param $id string the id, with or without #
+	 * @return string html string
+	 */
+	public function tmpl_by_id( $id ) {
+		if( "#" !== substr($id, 0, 1) ) {
+			$id = "#" . $id;
+		}
+
+		return $this->pq( $id )->eq(0)->html();
+	}//end getElementById
+
+	/**
 	 * Render a template using some provided template variables.
 	 *
 	 * 1. $tpl->tmpl('<i>Hi, ${name}</i>', array('name' => 'Adam')); // "<i>Hi, Adam</i>"
@@ -46,10 +60,10 @@ class jqTmpl {
 	 * @return the rendered template string
 	 */
 	public function tmpl( $tmpl, $data = null, $options = array() ) {
-		if( is_string($tmpl) ) {
+		if( preg_match('/^#-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/', $tmpl) ) {
+			$tmpl_string = $this->tmpl_by_id( $tmpl );
+		} else {
 			$tmpl_string = $tmpl;
-		} elseif( $tmpl instanceof phpQueryObject ) {
-			$tmpl_string = $tmpl->eq(0)->html();
 		}
 
 		$tmpl_string = $this->preparse( $tmpl_string );
@@ -222,7 +236,7 @@ class jqTmpl {
 
 				$target = trim($target, '\'"');
 
-				$html .= $this->tmpl( $this->pq($target), $data );
+				$html .= $this->tmpl( $target, $data );
 			}
 
 			// {{! comment}}
