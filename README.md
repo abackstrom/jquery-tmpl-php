@@ -72,3 +72,9 @@ Output (whitespace adjusted):
 
 	<tr class="title"><td>The Inheritance</td></tr>
 	<tr class="detail"><td>Director: Mauro Bolognini</td></tr>
+
+See Also
+--------
+
+* xyu's [jquery-tmpl-php](http://github.com/xyu/jquery-tmpl-php)
+* awhatley's [jquery-tmpl.net](http://github.com/awhatley/jquery-tmpl.net)
