@@ -27,7 +27,7 @@ Known unsupported:
 Dependencies
 ------------
 
-* [phpQuery](http://code.google.com/p/phpquery/) -- jQuery-like selectors in PHP
+* [html5lib](http://code.google.com/p/html5lib/) -- "A Python and PHP implementations of a HTML parser based on the WHATWG HTML5 specification for maximum compatibility with major desktop web browsers."
 
 Optional:
 
@@ -60,15 +60,15 @@ Examples
 		(object)array("Name" => "The Inheritance", "Director" => "Mauro Bolognini")
 	);
 
-	echo $t->tmpl( $t->pq('#movieTemplate'), $data, array('render_once' => false) );
+	echo $t->tmpl( '#movieTemplate', $data, array('render_once' => false) );
 
 Output (whitespace adjusted):
 
-	<tr class="title"><td>The Red Violin
-	<tr class="detail"><td>Director: Francois Girard
+	<tr class="title"><td>The Red Violin</td></tr>
+	<tr class="detail"><td>Director: Francois Girard</td></tr>
 
-	<tr class="title"><td>Eyes Wide Shut
-	<tr class="detail"><td>Director: Stanley Kubrick
+	<tr class="title"><td>Eyes Wide Shut</td></tr>
+	<tr class="detail"><td>Director: Stanley Kubrick</td></tr>
 
-	<tr class="title"><td>The Inheritance
-	<tr class="detail"><td>Director: Mauro Bolognini
+	<tr class="title"><td>The Inheritance</td></tr>
+	<tr class="detail"><td>Director: Mauro Bolognini</td></tr>

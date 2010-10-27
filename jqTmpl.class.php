@@ -1,6 +1,6 @@
 <?php
 
-require_once 'phpQuery.php';
+require_once 'HTML5/Parser.php';
 
 /**
  * jquery-tmpl implemented in PHP.
@@ -12,6 +12,7 @@ class jqTmpl {
 	 * Future home of cached templates?
 	 */
 	public $templates = array();
+	public $_templates = array();
 
 	/**
 	 * Boolean for debug output.
@@ -26,11 +27,19 @@ class jqTmpl {
 	 * @return the created phpQueryObject
 	 */
 	public function load_document( $html ) {
-		$pq = phpQuery::newDocument( $html );
+		$dom = HTML5_Parser::parse( $html );
 
-		$this->pq($pq);
+		// TODO: getElementById?
+		$nodes = $dom->getElementsByTagName('script');
 
-		return $this->pq();
+		// reset cached templates lists
+		$this->templates = $this->_templates = array();
+
+		foreach( $nodes as $node ) {
+			if( $id = $node->getAttribute('id') ) {
+				$this->_templates[$id] = $node->nodeValue;
+			}
+		}
 	}//end load_document
 
 	/**
@@ -40,11 +49,20 @@ class jqTmpl {
 	 * @return string html string
 	 */
 	public function tmpl_by_id( $id ) {
-		if( "#" !== substr($id, 0, 1) ) {
-			$id = "#" . $id;
+		// remove # if it's there
+		if( "#" === substr($id, 0, 1) ) {
+			$id = substr($id, 1);
 		}
 
-		return $this->pq( $id )->eq(0)->html();
+		if( isset($this->templates[$id]) ) {
+			return $this->templates[$id];
+		}
+
+		if( isset($this->_templates[$id]) ) {
+			return $this->templates[$id] = $this->preparse($this->_templates[$id]);
+		}
+
+		return null;
 	}//end getElementById
 
 	/**
@@ -64,9 +82,8 @@ class jqTmpl {
 			$tmpl_string = $this->tmpl_by_id( $tmpl );
 		} else {
 			$tmpl_string = $tmpl;
+			$tmpl_string = $this->preparse( $tmpl_string );
 		}
-
-		$tmpl_string = $this->preparse( $tmpl_string );
 
 		preg_match_all( '/\{\{(?<slash>\/?)(?<type>\w+|.)(?:\((?<fnargs>(?:[^\}]|\}(?!\}))*?)?\))?(?:\s+(?<target>.*?)?)?(?<parens>\((?<args>(?:[^\}]|\}(?!\}))*?)\))?\s*\}\}/', $tmpl_string, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
 
@@ -266,26 +283,6 @@ class jqTmpl {
 			vprintf( $s . "\n", $args );
 		}
 	}//end debug
-
-	/**
-	 * Get, set, or query using the phpQuery object.
-	 *
-	 * @param $arg string|phpQueryObject if a string, query the dom and return the result. if a phpQuery object, use this object as our internal phpQuery object. if null, return the current phpQuery object.
-	 * @return returns a phpQuery object, possibly the result of a selection
-	 */
-	public function pq( $arg = null ) {
-		static $pq = null;
-
-		if( $arg !== null ) {
-			if( $arg instanceof phpQueryObject ) {
-				return $pq = $arg; 
-			} else {
-				return pq($arg, $pq);
-			}
-		}
-
-		return $pq;
-	}//end pq
 
 	/**
 	 * Do some pre-rendering cleanup.

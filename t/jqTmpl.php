@@ -75,7 +75,7 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 	function testDomSelection() {
 		$t = new jqTmpl;
 
-		$t->load_document('<div id="one">foo</div><div id="two">bar</div>');
+		$t->load_document('<script id="one">foo</script><script id="two">bar</script>');
 
 		$this->assertEquals(
 			'bar',
@@ -98,9 +98,7 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 
 		$html = '<script type="text/x-jquery-tmpl" id="foo">${bar}</script>' .
 			'<script type="text/x-jquery-tmpl" id="shazbot">{{= greeting}}</script>';
-
 		$t->load_document($html);
-
 		$this->assertEquals(
 			'nanu',
 			$t->tmpl( '#shazbot', (object)array('greeting' => 'nanu') ),
@@ -108,13 +106,30 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 		);
 
 		$html = '<script type="text/x-jquery-tmpl" id="foo"><td>${bar}</td></script>';
-
 		$t->load_document($html);
-
 		$this->assertEquals(
 			'<td>pit</td>',
 			$t->tmpl( '#foo', (object)array('bar' => 'pit') ),
 			'dom parser allows ETAGO </'
+		);
+
+		$html = '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+</head>
+<body>
+<script type="text/x-jquery-tmpl" id="foo"><td>${bar}</td></script>
+</body>
+</html>
+';
+		$t->load_document($html);
+		$this->assertEquals(
+			'<td>pit</td>',
+			$t->tmpl( '#foo', (object)array('bar' => 'pit') ),
+			'fragment in complete html5 file'
 		);
 	}
 
