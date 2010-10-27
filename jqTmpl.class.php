@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * jquery-tmpl-php
+ * 2010 Adam Backstrom <adam@sixohthree.com>
+ *
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ *
+ * See project page on github for licenses:
+ *
+ *     http://github.com/abackstrom/jquery-tmpl-php
+ */
+
 require_once 'HTML5/Parser.php';
 
 /**
@@ -85,6 +96,7 @@ class jqTmpl {
 			$tmpl_string = $this->preparse( $tmpl_string );
 		}
 
+		// regex from jquery-tmpl, modified for named subpatterns
 		preg_match_all( '/\{\{(?<slash>\/?)(?<type>\w+|.)(?:\((?<fnargs>(?:[^\}]|\}(?!\}))*?)?\))?(?:\s+(?<target>.*?)?)?(?<parens>\((?<args>(?:[^\}]|\}(?!\}))*?)\))?\s*\}\}/', $tmpl_string, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
 
 		$state = array(
