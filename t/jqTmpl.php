@@ -185,6 +185,28 @@ class jqTmplTest extends PHPUnit_Framework_TestCase {
 			$t->tmpl( 'out-{{if foo}}if1-{{if foo}}if2-{{else}}if2else-{{/if}}{{else}}else1-{{if bar}}else1if-{{else}}else1else-{{/if}}{{/if}}out', (object)array('foo' => false, 'bar' => true) ),
 			'nested {{if}}, outer {{if}} false, nesting in {{else}}'
 		);
+
+		$tmpl = 'out-{{if foo}}one{{else bar}}two{{else blee}}three{{else}}four{{/if}}-out';
+		$this->assertEquals(
+			'out-one-out',
+			$t->tmpl( $tmpl, (object)array('foo' => true, 'bar' => true, 'blee' => true) ),
+			'elseif pass 1'
+		);
+		$this->assertEquals(
+			'out-two-out',
+			$t->tmpl( $tmpl, (object)array('foo' => false, 'bar' => true, 'blee' => true) ),
+			'elseif pass 2'
+		);
+		$this->assertEquals(
+			'out-three-out',
+			$t->tmpl( $tmpl, (object)array('foo' => false, 'bar' => false, 'blee' => true) ),
+			'elseif pass 3'
+		);
+		$this->assertEquals(
+			'out-four-out',
+			$t->tmpl( $tmpl, (object)array('foo' => false, 'bar' => false, 'blee' => false) ),
+			'elseif pass 4'
+		);
 	}
 
 	function testExpression() {

@@ -131,6 +131,10 @@ class jqTmpl {
 	public function parse( $tmpl, $data, &$matches, &$state ) {
 		$html = '';
 
+		// each iteration of the function can track whether or not something
+		// has displayed. first pass will be from the parent {{if}}.
+		$if_did_output = ! $state['skip'];
+
 		extract( $state, EXTR_REFS );
 
 		$depth += 1;
@@ -213,9 +217,21 @@ class jqTmpl {
 			elseif( $type == 'else' ) {
 				// this will happen in a recursed parse()
 				
-				// flip skip from the parent; if the parent {{if}} showed, we want to hide,
-				// and vice-versa
-				$skip = !$skip;
+				// loop has shown, so we can't.
+				if( $if_did_output ) {
+					$skip = true;
+				}
+				
+				// loop hasn't shown yet; can we show?
+				else {
+					if( $target === null ) {
+						$if_did_output = true;
+						$skip = false;
+					} elseif( $target && $data->$target ) {
+						$if_did_output = true;
+						$skip = false;
+					}
+				}
 
 				// let processing continue as normal
 			}

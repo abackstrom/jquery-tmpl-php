@@ -13,7 +13,7 @@ jquery-tmpl is implemented by converting template code into valid JavaScript. As
 * `${foo}`, `{{= foo}}`
 * `{{html bar}}`
 * `{{if foo}}`
-* `{{else}}`
+* `{{else}}`, `{{else param}}`
 * `{{! comment}}`
 * `{{tmpl "selector"}}`, ie. `{{tmpl "#baz"}}`
 * `{{each foo}}`, `{{each(k,v) foo}}`
