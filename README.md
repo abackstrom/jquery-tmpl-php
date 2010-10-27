@@ -31,7 +31,7 @@ Dependencies
 
 Optional:
 
-* [PHPUnit](http://www.phpunit.de/) -- running tests
+* [PHPUnit](http://www.phpunit.de/) -- running tests: `make test` or `phpunit t/jqTmpl.php`
 
 Examples
 --------
@@ -60,7 +60,7 @@ Examples
 		(object)array("Name" => "The Inheritance", "Director" => "Mauro Bolognini")
 	);
 
-	echo $t->tmpl( '#movieTemplate', $data, array('render_once' => false) );
+	echo $t->tmpl( '#movieTemplate', $data );
 
 Output (whitespace adjusted):
 

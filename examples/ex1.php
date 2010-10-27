@@ -21,4 +21,5 @@ $data = array(
 	(object)array("Name" => "Eyes Wide Shut", "Director" => "Stanley Kubrick"),
 	(object)array("Name" => "The Inheritance", "Director" => "Mauro Bolognini")
 );
+
 echo $t->tmpl( '#movieTemplate', $data );
